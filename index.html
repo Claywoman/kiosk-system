@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign-In Kiosk</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Tailwind CSS dark mode configuration
+    // On page load or when changing themes, best to add/remove 'dark' class on <html>
+    // This script block is a common way to prevent FOUC for dark mode
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+  <style>
+    /* Minimal critical styles if needed, or can be in styles.css */
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 dark:bg-black text-gray-900 dark:text-white min-h-screen flex flex-col items-center justify-center p-4 font-sans transition-colors duration-300">
+
+  <div class="w-full max-w-md">
+    <div class="fixed top-4 right-4 z-50">
+      <label class="theme-switch">
+        <input type="checkbox" id="theme-toggle-checkbox">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="bg-white dark:bg-gray-900 shadow-2xl rounded-xl p-6 md:p-10">
+      <img id="logo" src="https://img1.wsimg.com/isteam/ip/671a344d-c6c0-4496-b4cf-01ac2aae4d3a/google.png/:/" alt="Logo" class="w-32 h-auto mx-auto mb-6 rounded-md"/>
+      <h1 id="welcome-text" class="text-3xl font-bold text-center mb-8 text-gray-800 dark:text-white">Welcome</h1>
+
+      <form id="signin-form" class="space-y-5">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+          <input type="text" placeholder="Enter Full Name" required id="name" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow text-gray-900 dark:text-white">
+        </div>
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone Number</label>
+          <input type="tel" placeholder="Enter Phone Number" required id="phone" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow text-gray-900 dark:text-white">
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email (Optional)</label>
+          <input type="email" placeholder="Enter Email Address" id="email" class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow text-gray-900 dark:text-white">
+        </div>
+        <div>
+          <label for="service" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Service</label>
+          <select id="service" required class="mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-shadow text-gray-900 dark:text-white">
+            <option value="" disabled selected>Select a Service</option>
+            <option>Business Cards</option>
+            <option>Finger print</option>
+            <option>I9</option>
+            <option>Marketing</option>
+            <option>Passport</option>
+            </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-all duration-150 ease-in-out transform hover:scale-105">
+          Sign In
+        </button>
+      </form>
+
+      <div id="confirmation" class="hidden my-6 p-4 rounded-lg text-center">
+        </div>
+
+      <div id="qr-container" class="text-center mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl shadow">
+        <p class="mb-3 text-sm text-gray-600 dark:text-gray-400">Leave us a review!</p>
+        <img id="qr-code" alt="Google Review QR Code" class="mx-auto rounded-md w-32 h-32">
+      </div>
+    </div>
+    <div class="text-xs text-center mt-6 text-gray-500 dark:text-gray-400">
+      By signing in, you agree to our
+      <a href="#" id="terms-link" class="underline hover:text-blue-500 dark:hover:text-blue-400">Terms</a> and
+      <a href="#" id="privacy-link" class="underline hover:text-blue-500 dark:hover:text-blue-400">Privacy Policy</a>.
+    </div>
+
+    <div id="datetime" class="text-sm text-center mt-4 text-gray-600 dark:text-gray-400"></div>
+  </div>
+  <div id="modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[100] p-4 hidden transition-opacity duration-300">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto relative transform transition-all scale-95 opacity-0" id="modal-content-wrapper">
+      <button class="close-modal absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl leading-none">&times;</button>
+      <div id="modal-text" class="prose dark:prose-invert max-w-none prose-sm md:prose-base">
+        </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
