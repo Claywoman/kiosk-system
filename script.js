@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   // --- Configuration ---
-  // The APPS_SCRIPT_WEB_APP_URL will now be loaded dynamically from client.json
+  // The APPS_SCRIPT_WEB_APP_URL will now be loaded dynamically from clients.json
   let APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVqjYwONLN9fimVm1R274mvScD_VfCSDwwq02OVYQkSPC-LzKMSkOZbpH-wOiOy7HB/exec'; // Replace this';
 
   // --- DOM Elements ---
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
     localStorage.setItem('theme', theme);
   }
 
-  // Initialize theme based on localStorage, client.json, or system preference
+  // Initialize theme based on localStorage, clients.json, or system preference
   const storedTheme = localStorage.getItem('theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -56,18 +56,18 @@ document.addEventListener('DOMContentLoaded', function() {
   // Get the client key from the URL (e.g., ?client=papered)
   const clientKey = urlParams.get('client') || 'papered'; // Default to 'papered' if no client param
 
-  fetch('client.json') // Fetch the central client.json file
+  fetch('clients.json') // Fetch the central clients.json file
     .then(response => {
       if (!response.ok) {
-        console.error(`HTTP error! status: ${response.status} - Could not load client.json from server. Using defaults.`);
-        throw new Error('Failed to load client.json');
+        console.error(`HTTP error! status: ${response.status} - Could not load clients.json from server. Using defaults.`);
+        throw new Error('Failed to load clients.json');
       }
       return response.json();
     })
-    .then(clients => {
+    .then(cliaents => {
       const client = clients[clientKey];
       if (!client) {
-        console.warn(`Client configuration for "${clientKey}" not found in client.json. Using defaults.`);
+        console.warn(`Client configuration for "${clientKey}" not found in clients.json. Using defaults.`);
         applyInitialTheme(null);
         setupDefaultBranding();
         return;
@@ -76,12 +76,12 @@ document.addEventListener('DOMContentLoaded', function() {
       // Set the Apps Script Web App URL from the loaded client config
       APPS_SCRIPT_WEB_APP_URL = client.webhook;
       if (!APPS_SCRIPT_WEB_APP_URL) {
-        console.error(`Webhook URL not configured for client "${clientKey}" in client.json.`);
+        console.error(`Webhook URL not configured for client "${clientKey}" in clients.json.`);
         displayMessage('Configuration error: Webhook URL missing for this client.', 'error', 10000);
         return;
       }
 
-      // Apply Branding from client.json
+      // Apply Branding from clients.json
       document.title = client.name || "Sign-In Kiosk";
       if (logoImg && client.logo) logoImg.src = client.logo;
       else if (logoImg) logoImg.src = 'https://img1.wsimg.com/isteam/ip/671a344d-c6c0-4496-b4cf-01ac2aae4d3a/PaperedLogo.png/:/';
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(qrContainer) qrContainer.classList.add('hidden');
       }
 
-      // Apply Theme from client.json
+      // Apply Theme from clients.json
       applyInitialTheme(client.theme);
     })
     .catch(err => {
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
 
-      // Ensure the webhook URL has been loaded from client.json
+      // Ensure the webhook URL has been loaded from clients.json
       if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL.includes('YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE')) {
         displayMessage('Configuration error: Apps Script URL not loaded for this client.', 'error', 10000);
         return;
