@@ -165,3 +165,18 @@ html.dark a {
 html.dark #welcome-text {
     color: #ffffff !important;
 }
+/* Manual Dark Mode Overrides - Input Fields */
+html.dark input[type="text"],
+html.dark input[type="tel"],
+html.dark input[type="email"],
+html.dark select {
+    background-color: #1f2937 !important; /* Force a dark background for inputs/selects */
+    color: #ffffff !important; /* Force text inside inputs/selects to white */
+    border-color: #4b5563 !important; /* Optional: Adjust border color for dark inputs */
+}
+
+/* Optional: Ensure placeholder text is visible in dark mode inputs */
+html.dark input::placeholder,
+html.dark select::placeholder {
+    color: #9ca3af !important; /* A lighter gray for placeholders */
+}
