@@ -110,3 +110,20 @@
 /* input, select {
   @apply dark:placeholder-gray-500;
 } */
+/* Manual Dark Mode Overrides */
+html.dark body {
+    background-color: #000000; /* Force black background for dark mode */
+    color: #ffffff; /* Force white text for dark mode */
+}
+
+html.dark .bg-white {
+    background-color: #1a202c !important; /* Override white box to dark gray */
+}
+
+/* Target the test box for dark mode */
+html.dark .dark\:bg-red-500 {
+    background-color: #ef4444 !important; /* Red for dark mode test box */
+}
+html.dark .dark\:text-white {
+    color: #ffffff !important; /* White text for dark mode test box */
+}
