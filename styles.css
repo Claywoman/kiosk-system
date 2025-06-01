@@ -120,13 +120,6 @@ html.dark .bg-white {
     background-color: #1a202c !important; /* Override white box to dark gray */
 }
 
-/* Target the test box for dark mode */
-html.dark .dark\:bg-red-500 {
-    background-color: #ef4444 !important; /* Red for dark mode test box */
-}
-html.dark .dark\:text-white {
-    color: #ffffff !important; /* White text for dark mode test box */
-}
 /* Manual Dark Mode Overrides - Text Colors */
 html.dark label,
 html.dark p:not(.text-sm), /* This general p rule should still make other p tags white */
