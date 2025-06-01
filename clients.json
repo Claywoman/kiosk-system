@@ -4,7 +4,7 @@
     "logo": "images/google.png",
     "qr": "https://g.page/r/Cbo0Yy81O-peEBM/review",
     "theme": "dark",
-    "webhook": "https://docs.google.com/spreadsheets/d/1CVD4k6UtvbRe7PxZcRKebT5eqzO7NmkR_iXSVqYEqlY/edit?gid=0#gid=0"
+    "webhook": "https://script.google.com/macros/s/AKfycbwbZ93v3pIoyYqDkBXBR9-GZjircSqIQtBw3LQf5ZRNdJyNKDyN0dXYN38nAluVpwsl/exec"
   },
   "clientA": {
     "name": "Client A Business Name",
