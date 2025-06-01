@@ -127,3 +127,27 @@ html.dark .dark\:bg-red-500 {
 html.dark .dark\:text-white {
     color: #ffffff !important; /* White text for dark mode test box */
 }
+/* Manual Dark Mode Overrides - Text Colors */
+html.dark label,
+html.dark p:not(.text-sm), /* Target general paragraphs, exclude small text like "Leave us a review!" if needed */
+html.dark h1,
+html.dark h2 {
+    color: #ffffff !important; /* Force all labels, H1, H2, and general paragraphs to white */
+}
+
+/* Specifically target the small text under QR code and terms/privacy links */
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+    color: #d1d5db !important; /* Force these to a lighter gray for better contrast */
+}
+
+/* Ensure links remain readable */
+html.dark a {
+    color: #93c5fd !important; /* A light blue for links in dark mode */
+}
+
+/* Optional: If "Welcome" text is still dark */
+html.dark #welcome-text {
+    color: #ffffff !important;
+}
