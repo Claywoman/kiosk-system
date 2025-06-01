@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
   // --- Configuration ---
   // The APPS_SCRIPT_WEB_APP_URL will now be loaded dynamically from clients.json
-  let APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVqjYwONLN9fimVm1R274mvScD_VfCSDwwq02OVYQkSPC-LzKMSkOZbpH-wOiOy7HB/exec'; // Replace this';
+  // Initial default (will be overridden by client config)
+  let APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzVqjYwONLN9fimVm1R274mvScD_VfCSDwwq02OVYQkSPC-LzKMSkOZbpH-wOiOy7HB/exec';
 
   // --- DOM Elements ---
   const htmlElement = document.documentElement;
@@ -25,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const privacyLink = document.getElementById('privacy-link');
 
   // --- Device ID Management ---
-  // Generate or retrieve a unique device ID for this kiosk instance
   let deviceId = localStorage.getItem('kiosk_device_id');
   if (!deviceId) {
     deviceId = 'kiosk-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -39,9 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function applyTheme(theme) {
     if (theme === 'dark') {
       htmlElement.classList.add('dark');
+      // Set checkbox to unchecked for dark theme
       if (themeToggleCheckbox) themeToggleCheckbox.checked = false;
-    } else {
+    } else { // 'light' theme
       htmlElement.classList.remove('dark');
+      // Set checkbox to checked for light theme
       if (themeToggleCheckbox) themeToggleCheckbox.checked = true;
     }
     localStorage.setItem('theme', theme);
@@ -64,27 +66,29 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       return response.json();
     })
-    .then(cliaents => {
+    .then(clients => { // FIX IS HERE: Corrected 'cliaents' to 'clients'
       const client = clients[clientKey];
       if (!client) {
         console.warn(`Client configuration for "${clientKey}" not found in clients.json. Using defaults.`);
-        applyInitialTheme(null);
+        applyInitialTheme(null); // Pass null to allow fallback
         setupDefaultBranding();
         return;
       }
 
       // Set the Apps Script Web App URL from the loaded client config
       APPS_SCRIPT_WEB_APP_URL = client.webhook;
-      if (!APPS_SCRIPT_WEB_APP_URL) {
-        console.error(`Webhook URL not configured for client "${clientKey}" in clients.json.`);
+      if (!APPS_SCRIPT_WEB_APP_URL || APPS_SCRIPT_WEB_APP_URL.includes('YOUR_CLIENT_A_GOOGLE_APPS_SCRIPT_WEB_APP_URL')) { // Check for placeholder URL
+        console.error(`Webhook URL not configured or is placeholder for client "${clientKey}" in clients.json.`);
         displayMessage('Configuration error: Webhook URL missing for this client.', 'error', 10000);
+        // Optionally, prevent form submission if webhook is missing
+        if (form) form.querySelector('button[type="submit"]').disabled = true;
         return;
       }
 
       // Apply Branding from clients.json
       document.title = client.name || "Sign-In Kiosk";
       if (logoImg && client.logo) logoImg.src = client.logo;
-      else if (logoImg) logoImg.src = 'https://img1.wsimg.com/isteam/ip/671a344d-c6c0-4496-b4cf-01ac2aae4d3a/PaperedLogo.png/:/';
+      else if (logoImg) logoImg.src = 'https://img1.wsimg.com/isteam/ip/671a344d-c6c0-4496-b4cf-01ac2aae4d3a/PaperedLogo.png/:/'; // Fallback if client.logo is missing or empty
 
       // Set QR Code
       if (qrCodeImg && client.qr) {
@@ -99,8 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(err => {
       console.error("Error loading client config:", err.message);
-      applyInitialTheme(null);
+      // Fallback to initial theme logic if clients.json loading fails
+      applyInitialTheme(null); // Pass null to allow fallback
       setupDefaultBranding();
+      displayMessage('Error loading client configuration. Using default settings.', 'error', 10000);
     });
 
   function applyInitialTheme(clientThemePreference) {
@@ -117,13 +123,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function setupDefaultBranding() {
       document.title = "Sign-In Kiosk";
+      // Ensure the default logo is displayed if client config isn't loaded
       if (logoImg) logoImg.src = 'https://img1.wsimg.com/isteam/ip/671a344d-c6c0-4496-b4cf-01ac2aae4d3a/PaperedLogo.png/:/';
-      if (qrContainer) qrContainer.classList.add('hidden');
+      if (qrContainer) qrContainer.classList.add('hidden'); // Hide QR if no client config
   }
 
   // Theme toggle event listener
   if (themeToggleCheckbox) {
     themeToggleCheckbox.addEventListener('change', function() {
+      // If checkbox is checked, it means light mode is desired. If unchecked, dark mode.
       applyTheme(this.checked ? 'light' : 'dark');
     });
   }
@@ -168,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'text/plain' }, // Keep as text/plain for Google Apps Script
         body: JSON.stringify(formData)
       })
       .then(response => {
@@ -181,7 +189,9 @@ document.addEventListener('DOMContentLoaded', function() {
           try {
             return JSON.parse(text);
           } catch (e) {
-            return text; // Return raw text if not valid JSON
+            // If it's not JSON, return the raw text. Google Apps Script sometimes returns plain text.
+            console.warn('Apps Script response was not JSON. Attempting to parse as plain text.');
+            return text;
           }
         });
       })
@@ -189,13 +199,14 @@ document.addEventListener('DOMContentLoaded', function() {
         let status = 'error';
         let message = 'Unknown error during submission.';
 
+        // Robust check for success from Apps Script
         if (typeof data === 'object' && data !== null && data.status === "success") {
           status = 'success';
           message = `Thank you, ${formData.name}! Your sign-in for ${formData.service} is confirmed.`;
-        } else if (typeof data === 'string' && data.includes("Success")) {
+        } else if (typeof data === 'string' && (data.includes("Success") || data.toLowerCase().includes("ok"))) {
           status = 'success';
           message = `Thank you, ${formData.name}! Your sign-in for ${formData.service} is confirmed.`;
-          console.warn('Apps Script returned plain text "Success". Consider updating it to return JSON for better error handling.');
+          console.warn('Apps Script returned plain text. Consider updating it to return JSON for better error handling (e.g., {"status": "success", "message": "..."}).');
         } else if (typeof data === 'object' && data !== null && data.message) {
           message = `Submission failed: ${data.message}`;
         } else if (typeof data === 'string' && data.length > 0) {
@@ -210,15 +221,15 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           resetFormAndUI(3000);
         } else {
-          console.error('Submission failed (Apps Script):', data);
+          console.error('Submission failed (Apps Script response):', data);
           displayMessage(message, 'error', 10000);
-          resetFormAndUI(5000, false);
+          resetFormAndUI(5000, false); // Don't clear form on error, allow user to correct
         }
       })
       .catch((error) => {
         console.error('Error during submission (Network/JS):', error);
         displayMessage(`Error: ${error.message || 'Could not connect. Please try again.'}`, 'error', 10000);
-        resetFormAndUI(5000, false);
+        resetFormAndUI(5000, false); // Don't clear form on error
       })
       .finally(() => {
         submitButton.textContent = originalButtonText;
@@ -237,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
       confirmationDiv.classList.add('bg-green-100', 'dark:bg-green-900', 'border', 'border-green-500', 'dark:border-green-700', 'text-green-700', 'dark:text-green-200');
     } else if (type === 'error') {
       confirmationDiv.classList.add('bg-red-100', 'dark:bg-red-900', 'border', 'border-red-500', 'dark:border-red-700', 'text-red-700', 'dark:text-red-200');
-    } else {
+    } else { // info
       confirmationDiv.classList.add('bg-blue-100', 'dark:bg-blue-900', 'border', 'border-blue-500', 'dark:border-blue-700', 'text-blue-700', 'dark:text-blue-200');
     }
     confirmationDiv.classList.remove('hidden');
@@ -268,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalContentWrapper.classList.remove('scale-95', 'opacity-0');
                 modalContentWrapper.classList.add('scale-100', 'opacity-100');
             }
-            if(modal) modal.classList.remove('opacity-0');
+            if(modal) modal.classList.remove('opacity-0'); // Ensure modal is not hidden by opacity
         }, 20);
     }
   }
@@ -277,10 +288,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (modal && modalContentWrapper) {
         modalContentWrapper.classList.add('scale-95', 'opacity-0');
         modalContentWrapper.classList.remove('scale-100', 'opacity-100');
-        if(modal) modal.classList.add('opacity-0');
+        if(modal) modal.classList.add('opacity-0'); // Set opacity to 0 before hiding
         setTimeout(() => {
             if(modal) modal.classList.add('hidden');
-        }, 300);
+        }, 300); // Match this with your CSS transition duration
     }
   }
 
