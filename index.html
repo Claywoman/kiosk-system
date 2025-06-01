@@ -6,16 +6,7 @@
   <title>Sign-In Kiosk</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="styles.css">
-  <script>
-    // Tailwind CSS dark mode configuration
-    // On page load or when changing themes, best to add/remove 'dark' class on <html>
-    // This script block is a common way to prevent FOUC for dark mode
-    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  </script>
+  
   <style>
     /* Minimal critical styles if needed, or can be in styles.css */
     body {
